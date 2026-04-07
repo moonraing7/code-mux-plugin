@@ -186,8 +186,18 @@ code-mux forget <entry-id>
 ```bash
 bun run build
 bun run test
+bun run smoke
+bun run verify
+bun run clean:test-artifacts
 npm run pack:dry-run
 ```
+
+Development flow notes:
+
+- `bun run test` runs under an isolated sandbox `HOME` and isolated test temp root so automated tests cannot write into the maintainer `~/.code-mux/registry.json`.
+- `bun run smoke` runs the local/global/update smoke flow in the same kind of isolated sandbox and cleans it afterwards.
+- `bun run verify` runs the full build + isolated test + isolated smoke + pack dry-run sequence.
+- `bun run clean:test-artifacts` removes leaked test-shaped registry entries and their temp directories from the maintainer machine if an older manual run polluted `~/.code-mux/registry.json`.
 
 ## Release
 

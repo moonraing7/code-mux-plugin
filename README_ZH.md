@@ -186,8 +186,18 @@ code-mux forget <entry-id>
 ```bash
 bun run build
 bun run test
+bun run smoke
+bun run verify
+bun run clean:test-artifacts
 npm run pack:dry-run
 ```
+
+开发流程补充：
+
+- `bun run test` 会在隔离的 sandbox `HOME` 和隔离测试临时目录下运行，避免自动化测试写入维护者自己的 `~/.code-mux/registry.json`。
+- `bun run smoke` 会用同样的隔离 sandbox 跑 local/global/update smoke 流程，并在结束后清理。
+- `bun run verify` 会串行执行完整的 build + 隔离 test + 隔离 smoke + pack dry-run。
+- `bun run clean:test-artifacts` 用于在旧的手工验证把测试残留写进 `~/.code-mux/registry.json` 后，清理这些测试形态的 registry 项和临时目录。
 
 ## 发版
 

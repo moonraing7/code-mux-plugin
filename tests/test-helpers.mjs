@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { chmod, cp, mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
+import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -7,12 +8,21 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 export const repoRoot = resolve(process.cwd());
+export const testRoot = process.env.CODE_MUX_TEST_ROOT || join(tmpdir(), `code-mux-test-process-${process.pid}`);
+export const testHome = process.env.CODE_MUX_TEST_HOME || join(testRoot, "home");
+
+if (!process.env.CODE_MUX_TEST_ROOT) {
+  process.on("exit", () => {
+    rmSync(testRoot, { recursive: true, force: true });
+  });
+}
 
 function buildCliEnv(extraEnv = {}) {
   return {
     ...process.env,
     npm_command: "",
     npm_config_user_agent: "",
+    HOME: extraEnv.HOME || testHome,
     ...extraEnv,
   };
 }
@@ -31,7 +41,8 @@ async function runNodeCli(entryPath, args, options = {}) {
 }
 
 export async function makeTempDir(prefix) {
-  return mkdtemp(join(tmpdir(), prefix));
+  await mkdir(testRoot, { recursive: true });
+  return mkdtemp(join(testRoot, prefix));
 }
 
 export async function runRepoCli(args, options = {}) {

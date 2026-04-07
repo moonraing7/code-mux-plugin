@@ -183,6 +183,12 @@ Before claiming completion, run:
 - smoke generation into temporary directories
 - `npm pack --dry-run`
 
+Verification process rules:
+
+- run automated verification through the repo scripts so tests and smoke flows use an isolated `HOME` and isolated temp root instead of the maintainer environment
+- any test or smoke helper that invokes `code-mux` must route through the shared test helpers and must not fall back to the maintainer `~/.code-mux/registry.json`
+- after test or smoke runs, clean sandbox artifacts automatically; if leakage is detected in the maintainer registry, run `bun run clean:test-artifacts`
+
 Evidence must show:
 
 - stable host listing
