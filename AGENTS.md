@@ -107,6 +107,24 @@ One-time bootstrap exception:
 - if npm requires the package to exist before a trusted publisher can be attached, a one-time manual `npm publish --access public` is allowed from a logged-in maintainer machine
 - after bootstrap, return to the tag-driven GitHub Actions flow
 
+## Multilingual README Contract
+
+- `README.md` is the canonical English source for repository-facing documentation.
+- Localized README files must live at the repo root and follow the `README_<LANG>.md` naming pattern.
+- Every supported README must expose reciprocal language navigation near the top of the file.
+- Every supported README must preserve the same major section order as the canonical README.
+- These parity-critical facts must remain identical across languages:
+  - package name
+  - install commands
+  - verified hosts
+  - experimental targets
+  - Milestone 1 scope boundaries
+  - license
+  - only release and publish facts that are already true in the repository
+- When a canonical README change touches parity-critical facts, localized READMEs must be updated in the same change.
+- Do not add placeholder language files; every `README_<LANG>.md` must be a usable translation, not a stub.
+- README copy may improve framing and scanability, but it must not overclaim beyond current Milestone 1 behavior.
+
 ## Execution Rules
 
 1. `AGENTS.md` stays ahead of the code. If scope changes, update this file and the PRD before broadening implementation.

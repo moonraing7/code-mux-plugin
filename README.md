@@ -1,104 +1,143 @@
 # code-mux-plugin
 
-Template-driven generator for multi-host bridge skills and command packs.
+English | [简体中文](README_ZH.md)
 
-Package: `@moonraing7/code-mux-plugin`
+Template-driven generator for bridge skills, commands, and staged memory packs across Claude, Codex, Qoder, and experimental hosts.
 
+Package: `@moonraing7/code-mux-plugin`  
 License: `MIT`
 
-This repository is inspired by:
+## Why This Exists
 
-- [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc)
-- [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
-- [`thepushkarp/cc-gemini-plugin`](https://github.com/thepushkarp/cc-gemini-plugin)
-- [`Z-M-Huang/claude-codex-gemini`](https://github.com/Z-M-Huang/claude-codex-gemini)
+`code-mux-plugin` generates host-specific filesystem artifacts from shared adapter templates.
 
-Milestone 1 ships a generator core only. It writes host artifacts to disk; it does not invoke external providers.
+Milestone 1 is intentionally narrow:
 
-## Supported Surfaces
+- generate files only
+- support local project install and global user install
+- keep verified hosts separate from experimental outputs
+- avoid provider execution, auth setup, background jobs, and marketplace packaging
 
-### Verified
+This package does not run external AI providers. It writes the files you can inspect, version, and rerun safely.
 
-- `claude`: `skill`, `command`
-- `codex`: `skill`
-- `qoder`: `skill`, `command`
+## Host Coverage
 
-### Experimental
+### Verified hosts
 
-- `kimi`: `memory-pack`
-- `gemini`: `skill`
-- `antigravity`: `skill`
+| Host | Artifacts | Output style |
+| --- | --- | --- |
+| `claude` | `skill`, `command` | native host paths |
+| `codex` | `skill` | native host paths |
+| `qoder` | `skill`, `command` | native host paths |
 
-## Adapters
+### Experimental staged outputs
+
+| Host | Artifacts | Output style |
+| --- | --- | --- |
+| `kimi` | `memory-pack` | `.code-mux/experimental/...` |
+| `gemini` | `skill` | `.code-mux/experimental/...` |
+| `antigravity` | `skill` | `.code-mux/experimental/...` |
+
+Bridge adapters currently shipped in Milestone 1:
 
 - `kimi`
 - `gemini`
 - `qoder`
 - `antigravity`
 
-## Using CLI (Recommended)
+## Install
 
-Install from npm after release:
+### Using CLI (Recommended)
+
+Install the published package globally:
 
 ```bash
 npm install --global @moonraing7/code-mux-plugin
 ```
 
-Then run:
+Check the current host matrix:
 
 ```bash
 code-mux list-platforms
 ```
 
-For local development, build first:
+### Local development from this repo
 
 ```bash
 bun run build
-```
-
-List hosts:
-
-```bash
 node bin/code-mux.js list-platforms
 ```
 
-Generate all verified hosts for all adapters into a project:
+## Quick Start
+
+Generate one verified Codex skill into a project:
 
 ```bash
-node bin/code-mux.js init --host all --target /path/to/project
+code-mux init --host codex --artifact skill --adapter gemini --target /path/to/project
 ```
 
-Generate one verified artifact:
+This writes:
+
+```text
+/path/to/project/.codex/skills/mux-gemini/SKILL.md
+```
+
+Generate all verified outputs for all adapters into a project:
 
 ```bash
-node bin/code-mux.js init --host codex --artifact skill --adapter gemini --target /path/to/project
+code-mux init --host all --target /path/to/project
 ```
 
-Generate an experimental staged output:
+Generate a staged experimental output explicitly:
 
 ```bash
-node bin/code-mux.js init --host kimi --artifact memory-pack --adapter kimi --target /path/to/project --include-experimental
+code-mux init --host kimi --artifact memory-pack --adapter kimi --target /path/to/project --include-experimental
 ```
 
-## Global Install (Available for All Projects)
+This writes:
 
-Write verified outputs into user-home roots:
+```text
+/path/to/project/.code-mux/experimental/kimi/mux-kimi/AGENTS.md
+```
+
+## Install Modes
+
+### Local project install
+
+Writes into the target project root you pass with `--target`.
+
+Examples:
+
+- Claude skill: `.claude/skills/mux-<adapter>/SKILL.md`
+- Codex skill: `.codex/skills/mux-<adapter>/SKILL.md`
+- Qoder command: `.qoder/commands/mux-<adapter>.md`
+
+### Global install
+
+Writes into the current user's home-scoped host roots:
 
 ```bash
-node bin/code-mux.js init --host all --global
+code-mux init --host all --global
 ```
 
-Write one global command pack:
+Examples:
 
-```bash
-node bin/code-mux.js init --host claude --artifact command --adapter antigravity --global
-```
+- Claude skill: `~/.claude/skills/mux-<adapter>/SKILL.md`
+- Codex skill: `~/.codex/skills/mux-<adapter>/SKILL.md`
+- Qoder command: `~/.qoder/commands/mux-<adapter>.md`
+
+## Command Notes
+
+- `--host all` includes verified hosts only.
+- Experimental hosts require `--include-experimental`.
+- `--artifact` defaults to `all`.
+- `--adapter` defaults to `all`.
 
 ## Overwrite Policy
 
-- Managed files are overwritten on rerun.
-- Unmanaged files fail by default.
-- Use `--force` to replace unmanaged files.
+- managed files are overwritten on rerun
+- unmanaged files fail by default
+- `--force` is required to replace unmanaged files
 
 ## Development
 
@@ -108,35 +147,27 @@ bun run test
 npm run pack:dry-run
 ```
 
-## Notes
-
-- `--host all` includes verified hosts only.
-- Add `--include-experimental` to stage experimental outputs.
-- `--artifact` defaults to `all`.
-- `--adapter` defaults to `all`.
-
 ## Release
 
-This repository is configured for tag-driven releases:
+The repository uses tag-driven release automation:
 
-1. Ensure npm Trusted Publishing is enabled for `@moonraing7/code-mux-plugin` and linked to `moonraing7/code-mux-plugin` on GitHub.
-   Use the workflow file `.github/workflows/release.yml` when configuring the trusted publisher.
-2. Bump `package.json` to the release version.
-3. Push a matching Git tag such as `v0.1.0`.
-4. GitHub Actions will build, test, dry-run the package, publish to npm, and create a GitHub Release.
+1. keep `package.json` version aligned with the release tag
+2. push a matching tag such as `v0.1.1`
+3. GitHub Actions runs build, test, and `npm pack --dry-run`
+4. npm publish runs through Trusted Publishing
+5. the matching GitHub Release is created or updated
 
-Example:
+Workflow:
 
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
+- release workflow: `.github/workflows/release.yml`
+- npm package: `@moonraing7/code-mux-plugin`
+- GitHub repo: `moonraing7/code-mux-plugin`
 
-If npm Trusted Publishing has not been linked yet, configure the trusted publisher in the npm package settings before pushing the first release tag.
+## Reference Anchors
 
-If npm does not let you attach a trusted publisher before the package exists, bootstrap once from a logged-in local machine:
+These projects informed structure and scope decisions:
 
-```bash
-bun run test
-npm publish --access public
-```
+- [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc)
+- [`nextlevelbuilder/ui-ux-pro-max-skill`](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [`thepushkarp/cc-gemini-plugin`](https://github.com/thepushkarp/cc-gemini-plugin)
+- [`Z-M-Huang/claude-codex-gemini`](https://github.com/Z-M-Huang/claude-codex-gemini)

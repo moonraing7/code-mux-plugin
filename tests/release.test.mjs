@@ -20,6 +20,7 @@ test("package metadata is publish-ready for npm", async () => {
   assert.ok(pkg.files.includes("bin"));
   assert.ok(pkg.files.includes("dist"));
   assert.ok(pkg.files.includes("LICENSE"));
+  assert.ok(pkg.files.includes("README_ZH.md"));
   assert.ok(!pkg.files.includes("AGENTS.md"));
   assert.equal(pkg.scripts.prepack, "bun run build");
   assert.equal(pkg.scripts["pack:dry-run"], "npm pack --dry-run");

@@ -1,6 +1,6 @@
 {
   "name": "@moonraing7/code-mux-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Template-driven generator for Codex, Claude, Qoder, and staged experimental bridge artifacts.",
   "type": "module",
   "license": "MIT",
@@ -33,6 +33,7 @@
   },
   "files": [
     "README.md",
+    "README_ZH.md",
     "LICENSE",
     "assets",
     "bin",
