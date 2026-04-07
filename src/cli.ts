@@ -1,0 +1,125 @@
+import { resolve } from "node:path";
+import { initCommand } from "./commands/init.js";
+import { listPlatformsCommand } from "./commands/list-platforms.js";
+import {
+  ADAPTER_KEYS,
+  ARTIFACT_KEYS,
+  HOST_KEYS,
+  type AdapterKey,
+  type ArtifactType,
+  type HostKey,
+  type InitOptions,
+} from "./types.js";
+
+interface ParsedArgs {
+  command: string | undefined;
+  values: Map<string, string>;
+  booleans: Set<string>;
+}
+
+function usage(): string {
+  return [
+    "Usage:",
+    "  code-mux list-platforms",
+    "  code-mux init --host <name|all> [--artifact <type|all>] [--adapter <name|all>] [--target <path>] [--global] [--include-experimental] [--force]",
+    "",
+    `Hosts: ${HOST_KEYS.join(", ")}`,
+    `Artifacts: ${ARTIFACT_KEYS.join(", ")}`,
+    `Adapters: ${ADAPTER_KEYS.join(", ")}`,
+  ].join("\n");
+}
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const [command, ...rest] = argv;
+  const values = new Map<string, string>();
+  const booleans = new Set<string>();
+
+  for (let index = 0; index < rest.length; index += 1) {
+    const token = rest[index];
+    if (!token.startsWith("--")) {
+      continue;
+    }
+
+    const key = token.slice(2);
+    const next = rest[index + 1];
+    if (!next || next.startsWith("--")) {
+      booleans.add(key);
+      continue;
+    }
+
+    values.set(key, next);
+    index += 1;
+  }
+
+  return { command, values, booleans };
+}
+
+function readSelector<T extends string>(
+  values: Map<string, string>,
+  key: string,
+  allowed: readonly T[],
+  fallback: T | "all",
+): T | "all" {
+  const value = values.get(key);
+  if (!value) {
+    return fallback;
+  }
+
+  if (value === "all") {
+    return "all";
+  }
+
+  if (!allowed.includes(value as T)) {
+    throw new Error(`Unsupported --${key} value: ${value}`);
+  }
+
+  return value as T;
+}
+
+function buildInitOptions(parsed: ParsedArgs): InitOptions {
+  const host = readSelector(parsed.values, "host", HOST_KEYS, "all") as HostKey | "all";
+  const artifact = readSelector(
+    parsed.values,
+    "artifact",
+    ARTIFACT_KEYS,
+    "all",
+  ) as ArtifactType | "all";
+  const adapter = readSelector(
+    parsed.values,
+    "adapter",
+    ADAPTER_KEYS,
+    "all",
+  ) as AdapterKey | "all";
+
+  return {
+    host,
+    artifact,
+    adapter,
+    targetDir: resolve(parsed.values.get("target") || process.cwd()),
+    global: parsed.booleans.has("global"),
+    includeExperimental: parsed.booleans.has("include-experimental"),
+    force: parsed.booleans.has("force"),
+  };
+}
+
+export async function main(argv: string[]): Promise<void> {
+  const parsed = parseArgs(argv);
+
+  if (!parsed.command || parsed.booleans.has("help")) {
+    console.log(usage());
+    return;
+  }
+
+  if (parsed.command === "list-platforms") {
+    console.log(listPlatformsCommand());
+    return;
+  }
+
+  if (parsed.command === "init") {
+    const result = await initCommand(buildInitOptions(parsed));
+    console.log(result);
+    return;
+  }
+
+  throw new Error(`Unknown command: ${parsed.command}`);
+}

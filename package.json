@@ -1,0 +1,47 @@
+{
+  "name": "@moonraing7/code-mux-plugin",
+  "version": "0.1.0",
+  "description": "Template-driven generator for Codex, Claude, Qoder, and staged experimental bridge artifacts.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "code-mux": "./bin/code-mux.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonraing7/code-mux-plugin.git"
+  },
+  "homepage": "https://github.com/moonraing7/code-mux-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/moonraing7/code-mux-plugin/issues"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "claude",
+    "codex",
+    "generator",
+    "qoder"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "bun": ">=1.2.0"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "assets",
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build src/cli.ts --outfile dist/cli.js --target node",
+    "prepack": "bun run build",
+    "test": "bun run build && node --test",
+    "pack:dry-run": "npm pack --dry-run"
+  }
+}
