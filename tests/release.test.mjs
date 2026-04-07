@@ -9,6 +9,7 @@ test("package metadata is publish-ready for npm", async () => {
   assert.equal(pkg.name, "@moonraing7/code-mux-plugin");
   assert.equal(pkg.license, "MIT");
   assert.equal(Object.hasOwn(pkg, "private"), false);
+  assert.equal(pkg.bin["code-mux"], "bin/code-mux.js");
   assert.deepEqual(pkg.publishConfig, {
     access: "public",
     registry: "https://registry.npmjs.org/",
