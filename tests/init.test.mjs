@@ -34,19 +34,20 @@ test("list-platforms is stable and tiered", async () => {
   assert.equal(lines.at(-1), "antigravity\texperimental\tskill\tAntigravity staged skill pack");
 });
 
-test("verified local install writes managed Codex skill", async () => {
+test("verified local install writes managed Codex skill from cwd with --ai/--ada", async () => {
   const target = await mkdtemp(join(tmpdir(), "code-mux-local-"));
-  await runCli([
-    "init",
-    "--host",
-    "codex",
-    "--artifact",
-    "skill",
-    "--adapter",
-    "gemini",
-    "--target",
-    target,
-  ]);
+  await runCli(
+    [
+      "init",
+      "--ai",
+      "codex",
+      "--ada",
+      "gemini",
+    ],
+    {
+      cwd: target,
+    },
+  );
 
   const output = join(target, ".codex", "skills", "mux-gemini", "SKILL.md");
   const content = await readFile(output, "utf8");
@@ -56,6 +57,27 @@ test("verified local install writes managed Codex skill", async () => {
   assert.match(content, /gemini-oriented long-context exploration/i);
 });
 
+test("legacy --host/--adapter/--target flags remain compatible", async () => {
+  const target = await mkdtemp(join(tmpdir(), "code-mux-legacy-"));
+  await runCli([
+    "init",
+    "--host",
+    "codex",
+    "--artifact",
+    "skill",
+    "--adapter",
+    "kimi",
+    "--target",
+    target,
+  ]);
+
+  const output = join(target, ".codex", "skills", "mux-kimi", "SKILL.md");
+  const content = await readFile(output, "utf8");
+
+  assert.match(content, /generated-by: code-mux/);
+  assert.match(content, /Host: `codex`/);
+});
+
 test("global install resolves into HOME rather than cwd", async () => {
   const fakeHome = await mkdtemp(join(tmpdir(), "code-mux-home-"));
   const workspace = await mkdtemp(join(tmpdir(), "code-mux-work-"));
@@ -63,11 +85,11 @@ test("global install resolves into HOME rather than cwd", async () => {
   await runCli(
     [
       "init",
-      "--host",
+      "--ai",
       "claude",
       "--artifact",
       "command",
-      "--adapter",
+      "--ada",
       "kimi",
       "--global",
     ],

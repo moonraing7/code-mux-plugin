@@ -70,28 +70,31 @@ node bin/code-mux.js list-platforms
 
 ## Quick Start
 
-Generate one verified Codex skill into a project:
+Go to your project and generate one verified Codex skill:
 
 ```bash
-code-mux init --host codex --artifact skill --adapter gemini --target /path/to/project
+cd /path/to/project
+code-mux init --ai codex --ada kimi
 ```
 
 This writes:
 
 ```text
-/path/to/project/.codex/skills/mux-gemini/SKILL.md
+/path/to/project/.codex/skills/mux-kimi/SKILL.md
 ```
 
-Generate all verified outputs for all adapters into a project:
+Generate all verified outputs for all adapters into the current project:
 
 ```bash
-code-mux init --host all --target /path/to/project
+cd /path/to/project
+code-mux init --ai all
 ```
 
 Generate a staged experimental output explicitly:
 
 ```bash
-code-mux init --host kimi --artifact memory-pack --adapter kimi --target /path/to/project --include-experimental
+cd /path/to/project
+code-mux init --ai kimi --artifact memory-pack --ada kimi --include-experimental
 ```
 
 This writes:
@@ -104,7 +107,12 @@ This writes:
 
 ### Local project install
 
-Writes into the target project root you pass with `--target`.
+Writes into the current working directory. The recommended flow is:
+
+```bash
+cd /path/to/project
+code-mux init --ai codex --ada kimi
+```
 
 Examples:
 
@@ -117,7 +125,7 @@ Examples:
 Writes into the current user's home-scoped host roots:
 
 ```bash
-code-mux init --host all --global
+code-mux init --ai codex --ada kimi --global
 ```
 
 Examples:
@@ -128,10 +136,13 @@ Examples:
 
 ## Command Notes
 
-- `--host all` includes verified hosts only.
+- `--ai` is the preferred host selector and `--ada` is the preferred adapter selector.
+- `--host` and `--adapter` remain supported for compatibility.
+- `--target` remains supported for compatibility, but the recommended local install flow is to run from the project root.
+- `--ai all` includes verified hosts only.
 - Experimental hosts require `--include-experimental`.
 - `--artifact` defaults to `all`.
-- `--adapter` defaults to `all`.
+- `--ada` defaults to `all`.
 
 ## Overwrite Policy
 

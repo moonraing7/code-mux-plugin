@@ -21,7 +21,8 @@ function usage(): string {
   return [
     "Usage:",
     "  code-mux list-platforms",
-    "  code-mux init --host <name|all> [--artifact <type|all>] [--adapter <name|all>] [--target <path>] [--global] [--include-experimental] [--force]",
+    "  code-mux init --ai <name|all> [--ada <name|all>] [--artifact <type|all>] [--global] [--include-experimental] [--force]",
+    "  code-mux init --host <name|all> [--adapter <name|all>] [--target <path>] [--artifact <type|all>] [--global] [--include-experimental] [--force]",
     "",
     `Hosts: ${HOST_KEYS.join(", ")}`,
     `Artifacts: ${ARTIFACT_KEYS.join(", ")}`,
@@ -54,13 +55,26 @@ function parseArgs(argv: string[]): ParsedArgs {
   return { command, values, booleans };
 }
 
+function readValue(values: Map<string, string>, keys: readonly string[]): string | undefined {
+  const presentValues = keys
+    .map((key) => values.get(key))
+    .filter((value): value is string => typeof value === "string");
+  const uniqueValues = [...new Set(presentValues)];
+
+  if (uniqueValues.length > 1) {
+    throw new Error(`Conflicting option values for ${keys.map((key) => `--${key}`).join(" and ")}.`);
+  }
+
+  return uniqueValues[0];
+}
+
 function readSelector<T extends string>(
   values: Map<string, string>,
-  key: string,
+  keys: readonly string[],
   allowed: readonly T[],
   fallback: T | "all",
 ): T | "all" {
-  const value = values.get(key);
+  const value = readValue(values, keys);
   if (!value) {
     return fallback;
   }
@@ -70,23 +84,23 @@ function readSelector<T extends string>(
   }
 
   if (!allowed.includes(value as T)) {
-    throw new Error(`Unsupported --${key} value: ${value}`);
+    throw new Error(`Unsupported ${keys.map((key) => `--${key}`).join("/")} value: ${value}`);
   }
 
   return value as T;
 }
 
 function buildInitOptions(parsed: ParsedArgs): InitOptions {
-  const host = readSelector(parsed.values, "host", HOST_KEYS, "all") as HostKey | "all";
+  const host = readSelector(parsed.values, ["ai", "host"], HOST_KEYS, "all") as HostKey | "all";
   const artifact = readSelector(
     parsed.values,
-    "artifact",
+    ["artifact"],
     ARTIFACT_KEYS,
     "all",
   ) as ArtifactType | "all";
   const adapter = readSelector(
     parsed.values,
-    "adapter",
+    ["ada", "adapter"],
     ADAPTER_KEYS,
     "all",
   ) as AdapterKey | "all";
@@ -95,7 +109,7 @@ function buildInitOptions(parsed: ParsedArgs): InitOptions {
     host,
     artifact,
     adapter,
-    targetDir: resolve(parsed.values.get("target") || process.cwd()),
+    targetDir: resolve(readValue(parsed.values, ["target"]) || process.cwd()),
     global: parsed.booleans.has("global"),
     includeExperimental: parsed.booleans.has("include-experimental"),
     force: parsed.booleans.has("force"),

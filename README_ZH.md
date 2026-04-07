@@ -70,28 +70,31 @@ node bin/code-mux.js list-platforms
 
 ## 快速开始
 
-向一个项目中生成单个 verified 的 Codex skill：
+先进入项目目录，再生成单个 verified 的 Codex skill：
 
 ```bash
-code-mux init --host codex --artifact skill --adapter gemini --target /path/to/project
+cd /path/to/project
+code-mux init --ai codex --ada kimi
 ```
 
 这会写入：
 
 ```text
-/path/to/project/.codex/skills/mux-gemini/SKILL.md
+/path/to/project/.codex/skills/mux-kimi/SKILL.md
 ```
 
-向一个项目中生成所有 verified 宿主的全部 adapter 输出：
+向当前项目目录中生成所有 verified 宿主的全部 adapter 输出：
 
 ```bash
-code-mux init --host all --target /path/to/project
+cd /path/to/project
+code-mux init --ai all
 ```
 
 显式生成一个 experimental staged output：
 
 ```bash
-code-mux init --host kimi --artifact memory-pack --adapter kimi --target /path/to/project --include-experimental
+cd /path/to/project
+code-mux init --ai kimi --artifact memory-pack --ada kimi --include-experimental
 ```
 
 这会写入：
@@ -104,7 +107,12 @@ code-mux init --host kimi --artifact memory-pack --adapter kimi --target /path/t
 
 ### 项目内安装
 
-使用 `--target` 写入指定项目根目录。
+默认写入当前工作目录。推荐流程：
+
+```bash
+cd /path/to/project
+code-mux init --ai codex --ada kimi
+```
 
 示例：
 
@@ -117,7 +125,7 @@ code-mux init --host kimi --artifact memory-pack --adapter kimi --target /path/t
 写入当前用户 home 目录下的宿主根路径：
 
 ```bash
-code-mux init --host all --global
+code-mux init --ai codex --ada kimi --global
 ```
 
 示例：
@@ -128,10 +136,13 @@ code-mux init --host all --global
 
 ## 命令说明
 
-- `--host all` 默认只包含 verified hosts。
+- `--ai` 是推荐的 host 选择参数，`--ada` 是推荐的 adapter 选择参数。
+- `--host` 和 `--adapter` 继续保留兼容。
+- `--target` 继续保留兼容，但推荐的项目内安装方式是先进入项目根目录再执行。
+- `--ai all` 默认只包含 verified hosts。
 - experimental hosts 必须显式加 `--include-experimental`。
 - `--artifact` 默认值是 `all`。
-- `--adapter` 默认值是 `all`。
+- `--ada` 默认值是 `all`。
 
 ## 覆盖策略
 

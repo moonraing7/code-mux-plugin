@@ -32,6 +32,8 @@ test("readme files keep parity-critical product facts", async () => {
     "gemini",
     "antigravity",
     "npm install --global @moonraing7/code-mux-plugin",
+    "code-mux init --ai codex --ada kimi",
+    "code-mux init --ai codex --ada kimi --global",
     ".github/workflows/release.yml",
   ];
 
