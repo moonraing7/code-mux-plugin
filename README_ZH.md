@@ -22,7 +22,7 @@ Milestone 1 的范围刻意保持收敛：
 
 ## 宿主覆盖范围
 
-### Verified hosts
+### 已验证宿主
 
 | Host | 产物类型 | 输出方式 |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Milestone 1 的范围刻意保持收敛：
 | `codex` | `skill` | 原生宿主路径 |
 | `qoder` | `skill`, `command` | 原生宿主路径 |
 
-### Experimental staged outputs
+### 实验性 staged outputs
 
 | Host | 产物类型 | 输出方式 |
 | --- | --- | --- |
@@ -152,7 +152,7 @@ npm run pack:dry-run
 仓库使用 tag 驱动的发布流程：
 
 1. 保持 `package.json` 版本与 release tag 一致
-2. 推送匹配的 tag，例如 `v0.1.1`
+2. 推送匹配的 tag，例如 `v<semver>`
 3. GitHub Actions 运行 build、test 和 `npm pack --dry-run`
 4. 通过 Trusted Publishing 发布到 npm
 5. 创建或更新对应的 GitHub Release

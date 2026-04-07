@@ -152,7 +152,7 @@ npm run pack:dry-run
 The repository uses tag-driven release automation:
 
 1. keep `package.json` version aligned with the release tag
-2. push a matching tag such as `v0.1.1`
+2. push a matching tag such as `v<semver>`
 3. GitHub Actions runs build, test, and `npm pack --dry-run`
 4. npm publish runs through Trusted Publishing
 5. the matching GitHub Release is created or updated
