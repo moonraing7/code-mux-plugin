@@ -15,8 +15,10 @@ Milestone 1 is intentionally narrow:
 
 - generate files only
 - support local project install and global user install
+- support a central registry and registry-backed update/repair flows
 - keep verified hosts separate from experimental outputs
 - avoid provider execution, auth setup, background jobs, and marketplace packaging
+- allow package-manager-mediated self-update only for supported npm install contexts
 
 This package does not run external AI providers. It writes the files you can inspect, version, and rerun safely.
 
@@ -103,6 +105,12 @@ This writes:
 /path/to/project/.code-mux/experimental/kimi/mux-kimi/AGENTS.md
 ```
 
+Refresh previously registered installs with the latest generator output:
+
+```bash
+code-mux update
+```
+
 ## Install Modes
 
 ### Local project install
@@ -134,11 +142,34 @@ Examples:
 - Codex skill: `~/.codex/skills/mux-<adapter>/SKILL.md`
 - Qoder command: `~/.qoder/commands/mux-<adapter>.md`
 
+## Update And Registry
+
+`code-mux` keeps a central registry at `~/.code-mux/registry.json` so later update runs can refresh historical installs without scanning the filesystem.
+
+Supported Milestone 1 self-update contexts:
+
+- global npm install invoked as `code-mux`
+- project-local npm install invoked via `node_modules/.bin/code-mux`
+
+Rejected in Milestone 1 with manual instructions:
+
+- source-checkout runs such as `node bin/code-mux.js`
+- transient runners such as `npx` and `npm exec`
+- non-npm launchers such as `bunx`
+
+When `code-mux update` finds a missing project path, it continues healthy refreshes first and then prints simple repair commands:
+
+```bash
+code-mux relink <entry-id> /new/path
+code-mux forget <entry-id>
+```
+
 ## Command Notes
 
 - `--ai` is the preferred host selector and `--ada` is the preferred adapter selector.
 - `--host` and `--adapter` remain supported for compatibility.
 - `--target` remains supported for compatibility, but the recommended local install flow is to run from the project root.
+- `update` refreshes registry-tracked installs and only self-updates in the supported npm contexts above.
 - `--ai all` includes verified hosts only.
 - Experimental hosts require `--include-experimental`.
 - `--artifact` defaults to `all`.

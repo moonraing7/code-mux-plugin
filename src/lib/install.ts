@@ -1,7 +1,7 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
-import type { InitOptions, PlannedFile } from "../types.js";
+import type { InitOptions, InstallResult, PlannedFile } from "../types.js";
 import { resolveRecipes, resolveAdapters } from "./recipes.js";
 import { resolveInstallBaseRoot } from "./paths.js";
 import { GENERATED_MARKER, renderContent } from "./templates.js";
@@ -55,8 +55,9 @@ export async function planFiles(options: InitOptions): Promise<PlannedFile[]> {
   return planned.sort((left, right) => left.relativePath.localeCompare(right.relativePath));
 }
 
-export async function install(options: InitOptions): Promise<PlannedFile[]> {
+export async function install(options: InitOptions): Promise<InstallResult> {
   const planned = await planFiles(options);
+  const baseRoot = getBaseRoot(options);
 
   for (const file of planned) {
     const managed = await isManaged(file.absolutePath);
@@ -72,7 +73,10 @@ export async function install(options: InitOptions): Promise<PlannedFile[]> {
     await writeFile(file.absolutePath, file.content, "utf8");
   }
 
-  return planned;
+  return {
+    files: planned,
+    baseRoot,
+  };
 }
 
 export function summarizeWrites(files: PlannedFile[], cwd: string): string[] {

@@ -34,6 +34,9 @@ test("readme files keep parity-critical product facts", async () => {
     "npm install --global @moonraing7/code-mux-plugin",
     "code-mux init --ai codex --ada kimi",
     "code-mux init --ai codex --ada kimi --global",
+    "code-mux update",
+    "code-mux relink <entry-id> /new/path",
+    "code-mux forget <entry-id>",
     ".github/workflows/release.yml",
   ];
 

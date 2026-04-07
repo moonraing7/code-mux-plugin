@@ -25,6 +25,8 @@ export type AdapterKey = (typeof ADAPTER_KEYS)[number];
 export type ArtifactType = (typeof ARTIFACT_KEYS)[number];
 export type Tier = "verified" | "experimental";
 export type Selector<T extends string> = T | "all";
+export type InstallScope = "local" | "global";
+export type UpdatePhase = "self-update" | "refresh";
 
 export interface HostSpec {
   key: HostKey;
@@ -52,10 +54,49 @@ export interface InitOptions {
   force: boolean;
 }
 
+export interface UpdateOptions {
+  phase: UpdatePhase;
+  runId?: string;
+  stateFile?: string;
+}
+
 export interface PlannedFile {
   recipe: RecipeSpec;
   adapter: AdapterKey;
   absolutePath: string;
   relativePath: string;
   content: string;
+}
+
+export interface InstallResult {
+  files: PlannedFile[];
+  baseRoot: string;
+}
+
+export interface InstallRecord {
+  entryId: string;
+  scope: InstallScope;
+  targetRoot: string;
+  host: Selector<HostKey>;
+  artifact: Selector<ArtifactType>;
+  adapter: Selector<AdapterKey>;
+  includeExperimental: boolean;
+  createdAt: string;
+  updatedAt: string;
+  packageVersion: string;
+}
+
+export interface InstallRegistry {
+  version: 1;
+  entries: InstallRecord[];
+}
+
+export interface InstallRecordInput {
+  scope: InstallScope;
+  targetRoot: string;
+  host: Selector<HostKey>;
+  artifact: Selector<ArtifactType>;
+  adapter: Selector<AdapterKey>;
+  includeExperimental: boolean;
+  packageVersion: string;
 }

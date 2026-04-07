@@ -22,9 +22,17 @@ export function resolveAssetsRoot(importMetaUrl: string): string {
   return resolve(resolveRepoRoot(importMetaUrl), "assets");
 }
 
+export function resolveHomeRoot(): string {
+  return process.env.HOME || homedir();
+}
+
 export function resolveInstallBaseRoot(targetDir: string, globalInstall: boolean): string {
   if (globalInstall) {
-    return process.env.HOME || homedir();
+    return resolveHomeRoot();
   }
   return targetDir;
+}
+
+export function resolveRegistryPath(): string {
+  return resolve(resolveHomeRoot(), ".code-mux", "registry.json");
 }

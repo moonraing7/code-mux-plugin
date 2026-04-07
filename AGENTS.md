@@ -8,8 +8,10 @@ Milestone 1 is intentionally narrow:
 
 - generate filesystem artifacts only
 - support local project install and global user install
+- support a central registry plus registry-backed update/repair flows for generated outputs
 - keep verified hosts separate from experimental outputs
 - do not ship runtime provider invocation, auth setup, background jobs, or marketplace publishing
+- allow package-manager-mediated self-update only for supported npm install contexts
 
 ## Reference Anchors
 
@@ -152,10 +154,13 @@ Milestone 1 should produce:
 - package/tooling spine
 - `list-platforms`
 - `init`
+- `update`
+- registry-backed relink/forget repair commands
 - local/global path resolution
+- central registry maintenance for local/global installs
 - verified host generation
 - experimental staged output generation
-- tests for pathing, gating, and idempotency
+- tests for pathing, gating, idempotency, and registry-backed update flows
 - npm package metadata for public publishing
 - tag-driven GitHub Actions release automation
 - GitHub Release creation wired to successful package publish
@@ -164,7 +169,7 @@ Milestone 1 should produce:
 Milestone 1 should not produce:
 
 - provider auth logic
-- external CLI execution
+- generalized external CLI execution beyond supported npm self-update
 - Claude plugin marketplace packaging
 - job persistence
 - review hooks
@@ -182,6 +187,9 @@ Evidence must show:
 
 - stable host listing
 - verified local/global paths work
+- registry writes remain stable and idempotent
+- supported update contexts refresh historical installs without filesystem scanning
+- stale entries do not block healthy refreshes and end with simple repair commands
 - experimental outputs require explicit opt-in
 - reruns respect overwrite policy
 - published tarball contains the intended runtime payload

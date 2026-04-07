@@ -15,8 +15,10 @@ Milestone 1 的范围刻意保持收敛：
 
 - 只生成文件
 - 支持项目内安装和全局安装
+- 支持中心注册表以及基于注册表的 update/repair 流程
 - 明确区分 verified hosts 和 experimental outputs
 - 不做 provider 执行、鉴权配置、后台任务和 marketplace 打包
+- 只在受支持的 npm 安装上下文里允许 package-manager-mediated self-update
 
 这个包不会直接调用外部 AI provider。它只负责生成你可以检查、提交、重复执行的文件。
 
@@ -103,6 +105,12 @@ code-mux init --ai kimi --artifact memory-pack --ada kimi --include-experimental
 /path/to/project/.code-mux/experimental/kimi/mux-kimi/AGENTS.md
 ```
 
+把已经登记过的历史安装刷新到最新生成内容：
+
+```bash
+code-mux update
+```
+
 ## 安装模式
 
 ### 项目内安装
@@ -134,11 +142,34 @@ code-mux init --ai codex --ada kimi --global
 - Codex skill：`~/.codex/skills/mux-<adapter>/SKILL.md`
 - Qoder command：`~/.qoder/commands/mux-<adapter>.md`
 
+## Update 与注册表
+
+`code-mux` 会在 `~/.code-mux/registry.json` 维护一个中心注册表，这样后续 update 可以刷新历史安装而不需要扫描文件系统。
+
+Milestone 1 支持的 self-update 上下文：
+
+- 以 `code-mux` 调起的全局 npm 安装
+- 通过 `node_modules/.bin/code-mux` 调起的项目内 npm 安装
+
+Milestone 1 明确拒绝并给出手动提示的上下文：
+
+- `node bin/code-mux.js` 这类源码直跑
+- `npx`、`npm exec` 这类临时 runner
+- `bunx` 这类非 npm launcher
+
+当 `code-mux update` 发现项目路径已经失效时，会先继续刷新健康项目，最后打印简洁修复命令：
+
+```bash
+code-mux relink <entry-id> /new/path
+code-mux forget <entry-id>
+```
+
 ## 命令说明
 
 - `--ai` 是推荐的 host 选择参数，`--ada` 是推荐的 adapter 选择参数。
 - `--host` 和 `--adapter` 继续保留兼容。
 - `--target` 继续保留兼容，但推荐的项目内安装方式是先进入项目根目录再执行。
+- `update` 会刷新注册表中记录的安装，并且只在上面列出的受支持 npm 上下文里做 self-update。
 - `--ai all` 默认只包含 verified hosts。
 - experimental hosts 必须显式加 `--include-experimental`。
 - `--artifact` 默认值是 `all`。

@@ -1,7 +1,10 @@
 import { resolve } from "node:path";
-import packageJson from "../package.json";
+import { forgetCommand } from "./commands/forget.js";
 import { initCommand } from "./commands/init.js";
 import { listPlatformsCommand } from "./commands/list-platforms.js";
+import { relinkCommand } from "./commands/relink.js";
+import { updateCommand } from "./commands/update.js";
+import { readPackageVersion } from "./lib/package.js";
 import {
   ADAPTER_KEYS,
   ARTIFACT_KEYS,
@@ -10,12 +13,14 @@ import {
   type ArtifactType,
   type HostKey,
   type InitOptions,
+  type UpdateOptions,
 } from "./types.js";
 
 interface ParsedArgs {
   command: string | undefined;
   values: Map<string, string>;
   booleans: Set<string>;
+  positionals: string[];
 }
 
 function usage(): string {
@@ -25,6 +30,9 @@ function usage(): string {
     "  code-mux list-platforms",
     "  code-mux init --ai <name|all> [--ada <name|all>] [--artifact <type|all>] [--global] [--include-experimental] [--force]",
     "  code-mux init --host <name|all> [--adapter <name|all>] [--target <path>] [--artifact <type|all>] [--global] [--include-experimental] [--force]",
+    "  code-mux update",
+    "  code-mux relink <entry-id> <new-path>",
+    "  code-mux forget <entry-id>",
     "",
     `Hosts: ${HOST_KEYS.join(", ")}`,
     `Artifacts: ${ARTIFACT_KEYS.join(", ")}`,
@@ -36,10 +44,12 @@ function parseArgs(argv: string[]): ParsedArgs {
   const [command, ...rest] = argv;
   const values = new Map<string, string>();
   const booleans = new Set<string>();
+  const positionals: string[] = [];
 
   for (let index = 0; index < rest.length; index += 1) {
     const token = rest[index];
     if (!token.startsWith("--")) {
+      positionals.push(token);
       continue;
     }
 
@@ -54,7 +64,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     index += 1;
   }
 
-  return { command, values, booleans };
+  return { command, values, booleans, positionals };
 }
 
 function readValue(values: Map<string, string>, keys: readonly string[]): string | undefined {
@@ -118,8 +128,22 @@ function buildInitOptions(parsed: ParsedArgs): InitOptions {
   };
 }
 
+function buildUpdateOptions(parsed: ParsedArgs): UpdateOptions {
+  const phaseValue = readValue(parsed.values, ["update-phase"]);
+  if (phaseValue && phaseValue !== "self-update" && phaseValue !== "refresh") {
+    throw new Error(`Unsupported --update-phase value: ${phaseValue}`);
+  }
+
+  return {
+    phase: (phaseValue as UpdateOptions["phase"] | undefined) || "self-update",
+    runId: readValue(parsed.values, ["update-run-id"]),
+    stateFile: readValue(parsed.values, ["update-state-file"]),
+  };
+}
+
 export async function main(argv: string[]): Promise<void> {
   const parsed = parseArgs(argv);
+  const packageVersion = await readPackageVersion(import.meta.url);
 
   if (!parsed.command || parsed.command === "--help" || parsed.command === "help" || parsed.booleans.has("help")) {
     console.log(usage());
@@ -127,7 +151,7 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (parsed.command === "--version" || parsed.command === "version") {
-    console.log(packageJson.version);
+    console.log(packageVersion);
     return;
   }
 
@@ -137,8 +161,24 @@ export async function main(argv: string[]): Promise<void> {
   }
 
   if (parsed.command === "init") {
-    const result = await initCommand(buildInitOptions(parsed));
-    console.log(result);
+    console.log(await initCommand(buildInitOptions(parsed)));
+    return;
+  }
+
+  if (parsed.command === "update") {
+    console.log(await updateCommand(buildUpdateOptions(parsed)));
+    return;
+  }
+
+  if (parsed.command === "relink") {
+    const [entryId, newPath] = parsed.positionals;
+    console.log(await relinkCommand(entryId, newPath));
+    return;
+  }
+
+  if (parsed.command === "forget") {
+    const [entryId] = parsed.positionals;
+    console.log(await forgetCommand(entryId));
     return;
   }
 
