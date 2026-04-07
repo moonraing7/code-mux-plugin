@@ -34,6 +34,18 @@ test("list-platforms is stable and tiered", async () => {
   assert.equal(lines.at(-1), "antigravity\texperimental\tskill\tAntigravity staged skill pack");
 });
 
+test("version flags print package version", async () => {
+  const packageJson = JSON.parse(
+    await readFile(join(repoRoot, "package.json"), "utf8"),
+  );
+
+  const versionFlag = await runCli(["--version"]);
+  const versionCommand = await runCli(["version"]);
+
+  assert.equal(versionFlag.stdout.trim(), packageJson.version);
+  assert.equal(versionCommand.stdout.trim(), packageJson.version);
+});
+
 test("verified local install writes managed Codex skill from cwd with --ai/--ada", async () => {
   const target = await mkdtemp(join(tmpdir(), "code-mux-local-"));
   await runCli(

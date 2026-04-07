@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import packageJson from "../package.json";
 import { initCommand } from "./commands/init.js";
 import { listPlatformsCommand } from "./commands/list-platforms.js";
 import {
@@ -20,6 +21,7 @@ interface ParsedArgs {
 function usage(): string {
   return [
     "Usage:",
+    "  code-mux --version",
     "  code-mux list-platforms",
     "  code-mux init --ai <name|all> [--ada <name|all>] [--artifact <type|all>] [--global] [--include-experimental] [--force]",
     "  code-mux init --host <name|all> [--adapter <name|all>] [--target <path>] [--artifact <type|all>] [--global] [--include-experimental] [--force]",
@@ -119,8 +121,13 @@ function buildInitOptions(parsed: ParsedArgs): InitOptions {
 export async function main(argv: string[]): Promise<void> {
   const parsed = parseArgs(argv);
 
-  if (!parsed.command || parsed.booleans.has("help")) {
+  if (!parsed.command || parsed.command === "--help" || parsed.command === "help" || parsed.booleans.has("help")) {
     console.log(usage());
+    return;
+  }
+
+  if (parsed.command === "--version" || parsed.command === "version") {
+    console.log(packageJson.version);
     return;
   }
 
